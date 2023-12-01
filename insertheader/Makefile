@@ -1,6 +1,6 @@
 CC = gcc
 CFLAGS = -Wall -Werror -I.
-LIBS = -L. -lmincrypt
+#LIBS = -L. -lmincrypt
 SRCS = $(wildcard *.c)
 OBJS = $(SRCS:.c=.o)
 APP = imgheaderinsert
