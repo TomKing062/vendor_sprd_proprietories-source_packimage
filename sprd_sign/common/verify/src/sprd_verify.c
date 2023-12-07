@@ -338,7 +338,7 @@ bool getpubkeyToVerifyVbmeta(char * pbkToVerifyVbmeta, char *path_key)
 	int flen, rsa_len;
 	size_t ret_num;
 
-	if ((file = fopen(path_key, "r")) == NULL) {
+	if ((file = fopen(path_key, "rb")) == NULL) {
 		perror("open key file error");
 		return false;
 	}
@@ -355,7 +355,7 @@ bool getpubkeyfrmPEM(sprd_rsapubkey * sprdPubk, char *path_key)
 	RSA *p_rsa;
 	FILE *file;
 	int flen, rsa_len;
-	if ((file = fopen(path_key, "r")) == NULL) {
+	if ((file = fopen(path_key, "rb")) == NULL) {
 		perror("open key file error");
 		return false;
 	}
@@ -390,7 +390,7 @@ bool calcSignature_pkcs1(uint8_t * hash_data, int hashLen, uint8_t * signature, 
 {
 	RSA *p_rsa;
 	FILE *file;
-	if ((file = fopen(path_key, "r")) == NULL) {
+	if ((file = fopen(path_key, "rb")) == NULL) {
 		perror("open key file error");
 		return false;
 	}
@@ -415,7 +415,7 @@ bool calcSignature_pss(uint8_t * hash_data, int hashLen, uint8_t * signature, ch
          uint32_t em_len = 0;
          RSA *p_rsa;
          FILE *file;
-         if ((file = fopen(path_key, "r")) == NULL) {
+         if ((file = fopen(path_key, "rb")) == NULL) {
                    perror("open key file error");
                    return false;
          }
