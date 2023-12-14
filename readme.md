@@ -1,13 +1,18 @@
 # sign image
 
 secure:
-	#imgheaderinsert will create "xxx-sign.bin"
-	imgheaderinsert xxx.bin 0 0
-	#old#sprd_sign xxx-sign.bin config pkcs15
-	sprd_sign xxx-sign.bin config pss
+
+​	#imgheaderinsert will create "xxx-sign.bin"
+
+​	imgheaderinsert xxx.bin 0 0
+
+​	#old#sprd_sign xxx-sign.bin config pkcs15
+
+​	sprd_sign xxx-sign.bin config pss
 
 insecure:
-	imgheaderinsert xxx.bin 1 0
+
+​	imgheaderinsert xxx.bin 1 0
 
 # sign vbmeta
 
