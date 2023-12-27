@@ -55,7 +55,7 @@ int main(int argc, char* argv[]) {
     fread(buffer, 1, file_size, file);
     fclose(file);
 
-    FILE* fo = fopen("sign_vbmeta.sh", "wb");  // 打开用于记录日志的文件
+    FILE* fo = fopen("sign_vbmeta.sh", "wb");
     if (fo == NULL) {
         fprintf(stderr, "Cannot create log file\n");
         return 0;
@@ -97,7 +97,8 @@ int main(int argc, char* argv[]) {
         else if (position_ok) position += 1;
         else position += 4;
     }
-    fprintf(fo, "--padding_size 16384 --output vbmeta-sign-custom.img");
+    int padding = read_int(buffer, 0xFFE30);
+    fprintf(fo, "--padding_size %d --output vbmeta-sign-custom.img", padding);
     fclose(fo);
     return 0;
 }
