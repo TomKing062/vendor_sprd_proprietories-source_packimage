@@ -97,7 +97,10 @@ int main(int argc, char* argv[]) {
         else if (position_ok) position += 1;
         else position += 4;
     }
-    int padding = read_int(buffer, 0xFFE30);
+    int padding = 0x1000;
+    if(read_int(buffer, 0) == 0x42544844) padding = read_int(buffer, 0x30);
+    else if(read_int(buffer, 0xFFE00) == 0x42544844) padding = read_int(buffer, 0xFFE30);
+    else printf("Warning: \"DHTB\" header not found.\n");
     fprintf(fo, "--padding_size %d --output vbmeta-sign-custom.img", padding);
     fclose(fo);
     return 0;
