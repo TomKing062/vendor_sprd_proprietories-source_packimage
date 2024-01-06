@@ -16,6 +16,8 @@
 
 #define DWORD unsigned long
 #define  SPRD_RSAPUBKLEN  sizeof(sprd_rsapubkey)
+//#define  VBMETA_USE_2048 0 //set in makefile
+#define  SPRD_RSA2048PUBKLEN  (520)
 #define  SPRD_RSA4096PUBKLEN  (1032)
 #pragma pack(1)
 

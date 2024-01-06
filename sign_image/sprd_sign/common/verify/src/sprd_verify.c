@@ -342,9 +342,11 @@ bool getpubkeyToVerifyVbmeta(char * pbkToVerifyVbmeta, char *path_key)
 		perror("open key file error");
 		return false;
 	}
-
+#if VBMETA_USE_2048
+	ret_num = fread((void *)pbkToVerifyVbmeta, 1, SPRD_RSA2048PUBKLEN, file);
+#else
 	ret_num = fread((void *)pbkToVerifyVbmeta, 1, SPRD_RSA4096PUBKLEN, file);
-
+#endif
 	fclose(file);
 	return true;
 }

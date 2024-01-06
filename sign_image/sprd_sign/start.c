@@ -288,7 +288,11 @@ int sprd_signimg(char *img, char *key_path, char *pss_flag)
 
 	strcat(key[0], "rsa2048_0_pub.pem");
 	strcat(key[1], "rsa2048_1_pub.pem");
+#if VBMETA_USE_2048
+	strcat(key[2], "rsa2048_2_pub.bin");
+#else
 	strcat(key[2], "rsa4096_vbmeta_pub.bin");
+#endif
 	strcat(key[3], "rsa2048_0.pem");
 	strcat(key[4], "rsa2048_1.pem");
 	strcat(key[5], "vdsp_firmware_privatekey.pem");
@@ -400,7 +404,11 @@ int sprd_signimg(char *img, char *key_path, char *pss_flag)
 
 		//dumpHex("pubkeyToVerifyVbmeta:",(unsigned char *)(pubkeyToVerifyVbmeta),SPRD_RSA4096PUBKLEN);
 
+#if VBMETA_USE_2048
+		cal_sha256(pubkeyToVerifyVbmeta, SPRD_RSA2048PUBKLEN, keycert.hash_key);
+#else
 		cal_sha256(pubkeyToVerifyVbmeta, SPRD_RSA4096PUBKLEN, keycert.hash_key);
+#endif
 		//dumpHex("pubkey hash ToVerifyVbmeta:",(unsigned char *)(keycert.hash_key),HASH_BYTE_LEN);
 		if(0 == strcmp(pss_flag,"pkcs15"))
 		{
