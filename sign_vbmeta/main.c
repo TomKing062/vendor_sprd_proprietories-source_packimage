@@ -81,8 +81,9 @@ int main(int argc, char* argv[]) {
     fseek(file, 0, SEEK_END);
     long file_size = ftell(file);
     fseek(file, 0, SEEK_SET);
-    unsigned char* buffer = (unsigned char*)malloc(file_size);
-    fread(buffer, 1, file_size, file);
+    unsigned char* buffer0 = (unsigned char*)malloc(file_size);
+    unsigned char* buffer = buffer0;
+    fread(buffer0, 1, file_size, file);
     fclose(file);
 
     FILE* fo = fopen("sign_vbmeta.sh", "wb");
@@ -91,6 +92,7 @@ int main(int argc, char* argv[]) {
         return 0;
     }
 
+    if (*(uint32_t*)buffer0 == 0x42544844) buffer += 0x200;
     AvbVBMetaImageHeader* vbheader = (AvbVBMetaImageHeader*)buffer;
     uint32_t algorithm_type = reverse_uint32(vbheader->algorithm_type);
     int rsa = 256 * (algorithm_type < 4 ? 1 : 2);
@@ -128,12 +130,12 @@ int main(int argc, char* argv[]) {
         if (tag != reverse_uint64(chainheader->tag)) break;
     }
     int padding = 0x1000;
-    if (*(uint32_t*)buffer == 0x42544844) padding = *(uint32_t*)(buffer + 0x30);
-    else if (*(uint32_t*)(buffer + 0xFFE00) == 0x42544844) padding = *(uint32_t*)(buffer + 0xFFE30);
+    if (*(uint32_t*)buffer0 == 0x42544844) padding = *(uint32_t*)(buffer0 + 0x30);
+    else if (*(uint32_t*)(buffer0 + 0xFFE00) == 0x42544844) padding = *(uint32_t*)(buffer0 + 0xFFE30);
     else printf("Warning: \"DHTB\" header not found.\n");
     fprintf(fo, "--padding_size %d --output vbmeta-sign-custom.img", padding);
     printf("padding_size %d\n", padding);
     fclose(fo);
-    free(buffer);
+    free(buffer0);
     return 0;
 }
