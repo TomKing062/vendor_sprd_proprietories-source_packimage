@@ -1,5 +1,6 @@
 CC = gcc
 CFLAGS = -Wall -Werror -I.
+LIBS = -lm
 SRCS = $(wildcard *.c)
 OBJS = $(SRCS:.c=.o)
 APP = generate_sign_script_for_vbmeta
