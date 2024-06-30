@@ -16,6 +16,6 @@ insecure:
 
 # sign vbmeta
 
-based on [VBMetaKeysExtractor](https://github.com/ProKn1fe/VBMetaKeysExtractor)
+~~based on [VBMetaKeysExtractor](https://github.com/ProKn1fe/VBMetaKeysExtractor)~~ fully rewritten according to Google avb
 
 Usage: `generate_sign_script_for_vbmeta vbmeta-sign.img`
