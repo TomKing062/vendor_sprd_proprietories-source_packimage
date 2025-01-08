@@ -130,11 +130,76 @@ int main(int argc, char* argv[]) {
         if (tag != reverse_uint64(chainheader->tag)) break;
     }
     int padding = 0x1000;
-    if (*(uint32_t*)buffer0 == 0x42544844) padding = *(uint32_t*)(buffer0 + 0x30);
-    else if (*(uint32_t*)(buffer0 + 0xFFE00) == 0x42544844) padding = *(uint32_t*)(buffer0 + 0xFFE30);
+    const char* script_path = "padding.py";
+    FILE* script_file = fopen(script_path, "wb");
+    if (!script_file) {
+        printf("Error: Cannot create script file %s\n", script_path);
+        return 1;
+    }
+    fprintf(script_file,
+        "import hashlib\n"
+        "f = open('vbmeta-sign-custom.img', 'rb')\n"
+        "b = f.read()\n"
+        "sha = hashlib.sha256(b).digest()\n"
+        "f.close()\n"
+        "f = open('vbmeta-sign-custom.img', 'wb')\n");
+    if (*(uint32_t*)buffer0 == 0x42544844)
+    {
+        padding = *(uint32_t*)(buffer0 + 0x30);
+        fprintf(script_file,
+            "f.write(b'\\x44\\x48\\x54\\x42\\x01\\x00\\x00\\x00')\n"
+            "f.write(sha)\n"
+            "f.write(b'\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00')\n"
+            "f.write(b'\\x%02X\\x%02X\\x00\\x00')\n"
+            "f.seek(512)\n"
+            "f.write(b)\n"
+            "f.close()\n",
+            padding & 0xff, (padding >> 8) & 0xff);
+    }
+    else if (*(uint32_t*)(buffer0 + 0xFFE00) == 0x42544844)
+    {
+        padding = *(uint32_t*)(buffer0 + 0xFFE30);
+        fprintf(script_file,
+            "f.write(b)\n"
+            "f.seek(1048576 - 512)\n"
+            "f.write(b'\\x44\\x48\\x54\\x42\\x01\\x00\\x00\\x00')\n"
+            "f.write(sha)\n");
+        uint8_t marker[] = { 0xcc,0xcc,0xcc,0xcc,0xaa,0xaa,0xaa,0xaa };
+        if (!memcmp(buffer0 + 0xFFE28, marker, 8))
+        {
+            fprintf(script_file,
+                "f.write(b'\\xCC\\xCC\\xCC\\xCC\\xAA\\xAA\\xAA\\xAA')\n");
+            fprintf(script_file,
+                "f.write(b'\\x%02X\\x%02X\\x00\\x00')\n",
+                padding & 0xff, (padding >> 8) & 0xff);
+            fprintf(script_file,
+                "f.seek(0xFFE4C)\n"
+                "f.write(b'\\x%02X\\x%02X\\x00\\x00')\n"
+                "f.write(b'\\x60\\x52')\n",
+                padding & 0xff, (padding >> 8) & 0xff);
+        }
+        else
+        {
+            fprintf(script_file,
+                "f.write(b'\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00')\n");
+            fprintf(script_file,
+                "f.write(b'\\x%02X\\x%02X\\x00\\x00')\n",
+                padding & 0xff, (padding >> 8) & 0xff);
+            if (*(uint32_t*)(buffer0 + 0xFFE3C))
+                fprintf(script_file,
+                    "f.seek(0xFFE3C)\n"
+                    "f.write(b'\\x%02X\\x%02X\\x00\\x00')\n",
+                    padding & 0xff, (padding >> 8) & 0xff);
+        }
+        fprintf(script_file,
+            "f.seek(1048576 - 1)\n"
+            "f.write(b'\\x00')\n"
+            "f.close()\n");
+    }
     else printf("Warning: \"DHTB\" header not found.\n");
     fprintf(fo, "--padding_size %d --output vbmeta-sign-custom.img", padding);
     printf("padding_size %d\n", padding);
+    fclose(script_file);
     fclose(fo);
     free(buffer0);
     return 0;

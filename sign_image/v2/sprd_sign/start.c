@@ -280,7 +280,7 @@ int sprd_signimg(char *img, char *key_path, char *pss_flag)
 			goto fail;
 		memset(key[i], 0, NAME_MAX_LEN);
 		strcpy(key[i], key_path);
-		if (key_path[strlen(key_path) - 1] != '\/')
+		if (key_path[strlen(key_path) - 1] != '/')
 			key[i][strlen(key_path)] = '/';
 		//printf("key[%d]= %s\n", i, key[i]);
 
@@ -327,7 +327,7 @@ int sprd_signimg(char *img, char *key_path, char *pss_flag)
 
     if (is_packed_modem_image(payload_addr)) {
         printf("new packed modem image is found!\n");
-        get_modem_info(payload_addr, &modem_offset, &modem_len);
+        get_modem_info((unsigned char *)payload_addr, &modem_offset, &modem_len);
         payload_addr += modem_offset;
         sign_hdr.payload_size = modem_len;
         printf("modem offset is %d \n", modem_offset);
@@ -369,8 +369,8 @@ int sprd_signimg(char *img, char *key_path, char *pss_flag)
 		printf("current pubk is: %s\n", key[0]);
 		printf("nextpubk is: %s\n", key[1]);
 		//dumpHex("payload:",payload_addr,512);
-		cal_sha256(payload_addr, sign_hdr.payload_size, keycert.hash_data);
-		cal_sha256(&nextpubk, SPRD_RSAPUBKLEN, keycert.hash_key);
+		cal_sha256((unsigned char *)payload_addr, sign_hdr.payload_size, keycert.hash_data);
+		cal_sha256((unsigned char *)&nextpubk, SPRD_RSAPUBKLEN, keycert.hash_key);
 		if(0 == strcmp(pss_flag,"pkcs15"))
 		{
 			calcSignature_pkcs1(keycert.hash_data, ((HASH_BYTE_LEN << 1) + 8), keycert.signature, key[3]);
@@ -400,14 +400,14 @@ int sprd_signimg(char *img, char *key_path, char *pss_flag)
 		getpubkeyToVerifyVbmeta((char *)pubkeyToVerifyVbmeta, key[2]);	/*pubk2 */
 		printf("current pubk is: %s\n", key[1]);
 		printf("pubkeyToVerifyVbmeta is: %s\n", key[2]);
-		cal_sha256(payload_addr, sign_hdr.payload_size, keycert.hash_data);
+		cal_sha256((unsigned char *)payload_addr, sign_hdr.payload_size, keycert.hash_data);
 
 		//dumpHex("pubkeyToVerifyVbmeta:",(unsigned char *)(pubkeyToVerifyVbmeta),SPRD_RSA4096PUBKLEN);
 
 #if VBMETA_USE_2048
-		cal_sha256(pubkeyToVerifyVbmeta, SPRD_RSA2048PUBKLEN, keycert.hash_key);
+		cal_sha256((unsigned char *)pubkeyToVerifyVbmeta, SPRD_RSA2048PUBKLEN, keycert.hash_key);
 #else
-		cal_sha256(pubkeyToVerifyVbmeta, SPRD_RSA4096PUBKLEN, keycert.hash_key);
+		cal_sha256((unsigned char *)pubkeyToVerifyVbmeta, SPRD_RSA4096PUBKLEN, keycert.hash_key);
 #endif
 		//dumpHex("pubkey hash ToVerifyVbmeta:",(unsigned char *)(keycert.hash_key),HASH_BYTE_LEN);
 		if(0 == strcmp(pss_flag,"pkcs15"))
@@ -442,7 +442,7 @@ int sprd_signimg(char *img, char *key_path, char *pss_flag)
 		sign_hdr.cert_size = sizeof(sprd_contentcert);
 		getpubkeyfrmPEM(&contentcert.pubkey, key[1]);	/*pubk1 */
 		printf("current pubk is: %s\n", key[1]);
-		cal_sha256(payload_addr, sign_hdr.payload_size, contentcert.hash_data);
+		cal_sha256((unsigned char *)payload_addr, sign_hdr.payload_size, contentcert.hash_data);
 		if(0 == strcmp(pss_flag,"pkcs15"))
 		{
 			calcSignature_pkcs1(contentcert.hash_data, (HASH_BYTE_LEN + 8), contentcert.signature, key[4]);
@@ -465,7 +465,7 @@ int sprd_signimg(char *img, char *key_path, char *pss_flag)
 		sign_hdr.cert_size = sizeof(sprd_contentcert);
 		getpubkeyfrmPEM(&contentcert.pubkey, key[6]);	/*pubk6 */
 		printf("current pubk is: %s\n", key[6]);
-		cal_sha256(payload_addr, sign_hdr.payload_size, contentcert.hash_data);
+		cal_sha256((unsigned char *)payload_addr, sign_hdr.payload_size, contentcert.hash_data);
 		if(0 == strcmp(pss_flag,"pkcs15"))
 		{
 			printf("use pkcs15 format \n");
