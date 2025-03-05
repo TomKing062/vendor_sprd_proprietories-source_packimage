@@ -255,7 +255,7 @@ int sprd_signimg(char *img, char *key_path, char *pss_flag)
 	int i;
 	int fd = 0;
 	int img_len;
-	char *key[7] = { 0 };
+	char *key[9] = { 0 };
 //	unsigned pagesize = 512;
 	char *input_data = NULL;
 	char *output_data = NULL;
@@ -274,7 +274,7 @@ int sprd_signimg(char *img, char *key_path, char *pss_flag)
 	img_name = basename(basec);
 
 	printf("input image name is:%s\n",img);
-	for (i = 0; i < 7; i++) {
+	for (i = 0; i < 9; i++) {
 		key[i] = (char *)malloc(NAME_MAX_LEN);
 		if (key[i] == 0)
 			goto fail;
@@ -297,6 +297,8 @@ int sprd_signimg(char *img, char *key_path, char *pss_flag)
 	strcat(key[4], "rsa2048_1.pem");
 	strcat(key[5], "vdsp_firmware_privatekey.pem");
 	strcat(key[6], "vdsp_firmware_publickey.pem");
+	strcat(key[7], "rsa2048_2_pub.pem");
+	strcat(key[8], "rsa2048_2.pem");
 
     getversion(key_path, &tversion);
 
@@ -482,8 +484,20 @@ int sprd_signimg(char *img, char *key_path, char *pss_flag)
 		if (write(fd, &contentcert, sizeof(sprd_contentcert)) != sizeof(sprd_contentcert))
 			goto fail;
 	} else {
-		printf("Error!!!!!!!:should use avbtool to sign boot/modem: %s\n", img_name);
-		goto fail;
+		printf("sign boot/modem: %s\n", img_name);
+		contentcert.certtype = CERTTYPE_CONTENT;
+		contentcert.version = tversion;
+		contentcert.type = Non_Trusted_Firmware;
+		printf("contentcert version is: %d\n", contentcert.version);
+		sign_hdr.cert_size = sizeof(sprd_contentcert);
+		getpubkeyfrmPEM(&contentcert.pubkey, key[7]);	/*pubk2 */
+		printf("current pubk is: %s\n", key[7]);
+		cal_sha256(payload_addr, sign_hdr.payload_size, contentcert.hash_data);
+		calcSignature_pkcs1(contentcert.hash_data, (HASH_BYTE_LEN + 8), contentcert.signature, key[8]);
+		if (write(fd, &sign_hdr, sizeof(sprdsignedimageheader)) != sizeof(sprdsignedimageheader))
+			goto fail;
+		if (write(fd, &contentcert, sizeof(sprd_contentcert)) != sizeof(sprd_contentcert))
+			goto fail;
 
 	}
     free(input_data);
