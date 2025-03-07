@@ -9,6 +9,10 @@
 #include <fcntl.h>
 #include <unistd.h>
 
+#ifndef O_BINARY
+#define O_BINARY 0 
+#endif
+
 typedef signed char       int8_t;
 typedef signed short      int16_t;
 typedef signed int        int32_t;

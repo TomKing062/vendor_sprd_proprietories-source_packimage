@@ -16,6 +16,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifndef O_BINARY
+#define O_BINARY 0 
+#endif
+
 char* my_strsep(char** stringp, const char* delim) {
     char* start = *stringp;
     char* p;
