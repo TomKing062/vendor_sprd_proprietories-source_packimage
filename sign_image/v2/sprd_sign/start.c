@@ -496,7 +496,7 @@ int sprd_signimg(char *img, char *key_path, char *pss_flag)
 		sign_hdr.cert_size = sizeof(sprd_contentcert);
 		getpubkeyfrmPEM(&contentcert.pubkey, key[7]);	/*pubk2 */
 		printf("current pubk is: %s\n", key[7]);
-		cal_sha256(payload_addr, sign_hdr.payload_size, contentcert.hash_data);
+		cal_sha256((unsigned char *)payload_addr, sign_hdr.payload_size, contentcert.hash_data);
 		calcSignature_pkcs1(contentcert.hash_data, (HASH_BYTE_LEN + 8), contentcert.signature, key[8]);
 		if (write(fd, &sign_hdr, sizeof(sprdsignedimageheader)) != sizeof(sprdsignedimageheader))
 			goto fail;
